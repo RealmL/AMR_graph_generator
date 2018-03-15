@@ -72,7 +72,7 @@ def get_all_relationship(line):
             r,stack=pop_relationship(stack)
             print(r+")")
             create_one_relationship(r)
-            
+
         i+=1
 
 def create_node():
@@ -82,21 +82,20 @@ def create_node():
 def create_one_relationship(r):
     # cypher = ""
     a = r[1:r.index(' ')]
-    # if r.count(':')>1:
-    #     temp=r[r.index(':')+1:-1]
-    #     for i in range(r.count(':')):
-    #         if temp.find('(',temp.index(':'),temp.)
-    #
-    # else:
     agro=r[r.index(':')+1:r.find(' ', r.index(':')+1)]
     b = r[r.index(' (')+2:r.find(' /', r.index(' (')+1)]
     print("%s-(%s)->%s" % (a, agro, b))
     # graph.create(Relationship(a, agro, b))
 
 if __name__ == "__main__":
-    with open("C:\\Work\\senior\\AMR\\example.txt") as file:
+    import sys
+    if(len(sys.argv)!=2):
+        print("run this script with one parameter: filename")
+        exit()
+    filename = sys.argv[1]
+    with open(filename) as file:
         line = merge_to_one_line(file)
         print(line)
-        get_all_nodes(line)
-        get_all_relationship(line)
+        #get_all_nodes(line)
+        #get_all_relationship(line)
         #create_node()
