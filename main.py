@@ -95,6 +95,7 @@ if __name__ == "__main__":
     filename = sys.argv[1]
     with open(filename) as file:
         line = merge_to_one_line(file)
+		
         print(line)
         #get_all_nodes(line)
         #get_all_relationship(line)
