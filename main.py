@@ -1,7 +1,7 @@
 from py2neo import Graph
 import re
 
-DEBUG_LEVEL = 2
+DEBUG_LEVEL = 1 #1 for db_info;2 for exception info ;3 for all info
 
 nodes = []
 relationships = []
@@ -39,7 +39,6 @@ def raw(text):
         except KeyError:
             new_string += char
     return new_string
-
 
 
 graph = Graph("http://127.0.0.1:7474", username="neo4j", password="xlsd1996")
@@ -115,6 +114,8 @@ def get_all_nodes(line, line_id):
 
 def save_all_nodes():
     for code, content, line_id in nodes:
+        if (DEBUG_LEVEL == 1):
+            print((code, content, line_id))
         create_node(code, content, line_id)
 
 
@@ -183,7 +184,6 @@ def filter_all_exception(line, line_id):
             father_code = find_father_node_code(line, p)
             if (DEBUG_LEVEL >= 2):
                 print((father_code, exception_piece))
-
             save_ex_relation(father_code, exception_piece, line_id)
             save_ex_node(exception_piece, line_id)
     res = exception_parten.sub('', line)
@@ -192,7 +192,8 @@ def filter_all_exception(line, line_id):
 
 def save_all_relationships():
     for a, argo, b, line_id in relationships:
-        # print(( a,argo,b,line_id))
+        if (DEBUG_LEVEL == 1):
+            print((a, argo, b, line_id))
         b = b.replace("'", " ")
         cypher = "MATCH (a:Word {code:'%s',line_id:'%s'}),(b:Word {code:'%s',line_id:'%s'}) CREATE (a)-[:LINK {type:'%s'}]->(b)" % (
             a, line_id, b, line_id, argo)
