@@ -17,6 +17,8 @@ def delete_relation(line):
 def merge_to_one_line(file):
     res=""
     for line in file:
+        if(line[0]=="#"):
+            continue
         res+=line.strip()
     return res
 
@@ -67,12 +69,12 @@ def get_all_relationship(line):
     while(i<len(line)):
         stack+=line[i]
         if(line[i]==")"):
-            if(':' not in stack):
-                break
-            r,stack=pop_relationship(stack)
-            print(r+")")
-            create_one_relationship(r)
-
+            if(':' in stack):
+                r,stack=pop_relationship(stack)
+                print(r+")")
+                create_one_relationship(r)
+            else:
+                stack=""
         i+=1
 
 def create_node():
@@ -95,8 +97,6 @@ if __name__ == "__main__":
     filename = sys.argv[1]
     with open(filename) as file:
         line = merge_to_one_line(file)
-		
-        print(line)
-        #get_all_nodes(line)
-        #get_all_relationship(line)
+        get_all_nodes(line)
+        get_all_relationship(line)
         #create_node()
