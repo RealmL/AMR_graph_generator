@@ -2,6 +2,8 @@ from py2neo import Graph,Node,Relationship
 import re
 
 node_dict= dict()
+relationships = []
+
 graph=Graph("http://127.0.0.1:7474",username="neo4j",password="xlsd1996")
 
 def delete_relation(line):
@@ -12,23 +14,17 @@ def delete_relation(line):
 def merge_to_lines(file):
     lines = []
     res = ""
+    line_id = ""
     for line in file:
         if(line[0]=="#" and len(res)>0):
-            lines.append(res)
+            lines.append((res,line_id))
             res = ""
+        if(line[:6]=="# ::id"):
+            line_id = re.findall("\# ::id (\S+) ::",line)[0]
         if(line[0]!="#"):
             res+=line.strip()
-    lines.append(res)
+    lines.append((res,line_id))
     return lines
-
-
-def merge_to_one_line(file):
-    res=""
-    for line in file:
-        if(line[0]=="#"):
-            continue
-        res+=line.strip()
-    return res
 
 def pop_node(stack):
     res = ""
@@ -51,33 +47,28 @@ def pop_relationship(stack):
             if(q_count==2):
                 return res[::-1],stack[:-1*(slice_position+1)]
 
-def save_node_to_dict(node):
-    try:
-        key = node[1:node.index(" ")]
-        value = node[node.index("/")+2:-1]
-        node_dict[key]=value
-    except Exception as e:
-        print(e)
-        print("="*20)
-        print(node)
-        print("="*20)
+def save_node_to_db(node,line_id):
+    #example: (o / obligate-01)
+    code = node[1:node.index(' ')]
+    content = node[node.index('/')+2:-1]
+    create_node(code,content,line_id)
+    print((code,content,line_id))
 
-def get_node_from_line(line):
+def get_node_from_line(line,line_id):
     stack = ""
     i=0
     while(i<len(line)):
         stack+=line[i]
         if(line[i]==")"):
             node,stack=pop_node(stack)
-            save_node_to_dict(node)
+            save_node_to_db(node,line_id)
         i+=1
 
-def get_all_nodes(line):
+def get_all_nodes(line,line_id):
     line = delete_relation(line)
-    get_node_from_line(line)
-    # print(len(node_dict.items()))
+    get_node_from_line(line,line_id)
 
-def get_all_relationship(line):
+def get_all_relationship(line,line_id):
     stack = ""
     i=0
     while(i<len(line)):
@@ -86,28 +77,18 @@ def get_all_relationship(line):
             if(':' in stack):
                 r,stack=pop_relationship(stack)
                 # print(r+")")
-                create_one_relationship(r)
+                a=r[1:r.index(' ')]
+                argo=r[r.index(':')+1:r.find(' ', r.index(':')+1)]
+                b = r[r.index(' (')+2:r.find(' /', r.index(' (')+1)]
+                t=(a,argo,b,line_id)
+                relationships.append(t)
             else:
                 stack=""
         i+=1
 
-def create_node():
-    for one in node_dict:
-        graph.run("create ( n:Word {code:'%s',content:'%s'})"%(one,node_dict[one]))
+def create_node(code,content,line_id):
+    graph.run("create ( n:Word {code:'%s',content:'%s',line_id:'%s'})" % (code,content,line_id))
 
-def create_one_relationship(r):
-    # cypher = ""
-    a = r[1:r.index(' ')]
-    try:
-        agro=r[r.index(':')+1:r.find(' ', r.index(':')+1)]
-        b = r[r.index(' (')+2:r.find(' /', r.index(' (')+1)]
-        # print("%s-(%s)->%s" % (a, agro, b))
-        # graph.create(Relationship(a, agro, b))
-    except Exception as e:
-        print(e)
-        print("="*10)
-        print(r)
-        print("="*10)
 
 def my_find_all(s,sub_str):
     return [m.start() for m in re.finditer(sub_str, s)]
@@ -126,15 +107,29 @@ def find_father_node_code(line,position):
                 return code
         i-=1
 
-def filter_all_exception(line):
+
+def save_ex_relation(father_code,e,line_id):
+    r,c = e.strip().split(' ')
+    t = (father_code,r[1:],c,line_id)
+    relationships.append(t)
+
+def filter_all_exception(line,line_id):
     pa = re.compile(":\S+ [^):(]+")
     es = set(re.findall(pa,line))
     for e in es:
         for p in my_find_all(line,e):
             father_code = find_father_node_code(line,p)
-            print(father_code,e)
+            save_ex_relation(father_code,e,line_id)
     res = pa.sub('',line)
     return res
+
+def save_all_relationships():
+    for a,argo,b,line_id in relationships:
+        print(( a,argo,b,line_id))
+        b = b.replace("'"," ")
+        cypher = "MATCH (a:Word {code:'%s',line_id:'%s'}),(b:Word {code:'%s',line_id:'%s'}) CREATE (a)-[:LINK {type:'%s'}]->(b)" % (a,line_id,b,line_id,argo)
+        graph.run(cypher)
+
 if __name__ == "__main__":
     import sys
     if(len(sys.argv)!=2):
@@ -142,8 +137,9 @@ if __name__ == "__main__":
         exit()
     filename = sys.argv[1]
     with open(filename) as file:
-        for l in merge_to_lines(file=file):
-            line = filter_all_exception(line=l)
-            get_all_nodes(line)
-            get_all_relationship(line)
+        for l,line_id in merge_to_lines(file=file):
+            line = filter_all_exception(l,line_id)
+            get_all_nodes(line,line_id)
+            get_all_relationship(line,line_id)
+    save_all_relationships()
         #create_node()
