@@ -80,17 +80,17 @@ def create_node():
         graph.run("create ( n:Word {code:'%s',content:'%s'})"%(one,node_dict[one]))
 
 def create_one_relationship(r):
-    cypher = ""
+    # cypher = ""
     a = r[1:r.index(' ')]
-    if r.count(':')>1:
-        temp=r[r.index(':')+1:-1]
-        for i in range(r.count(':')):
-            if temp.find('(',temp.index(':'),temp.)
-
-    else:
-        agro=r[r.index(':')+1:r.find(' ', r.index(':')+1)]
-        b = r[r.index(' (')+2:r.find(' /', r.index(' (')+1)]
-        print("%s-(%s)->%s" % (a, agro, b))
+    # if r.count(':')>1:
+    #     temp=r[r.index(':')+1:-1]
+    #     for i in range(r.count(':')):
+    #         if temp.find('(',temp.index(':'),temp.)
+    #
+    # else:
+    agro=r[r.index(':')+1:r.find(' ', r.index(':')+1)]
+    b = r[r.index(' (')+2:r.find(' /', r.index(' (')+1)]
+    print("%s-(%s)->%s" % (a, agro, b))
     # graph.create(Relationship(a, agro, b))
 
 if __name__ == "__main__":
