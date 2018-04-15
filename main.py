@@ -195,8 +195,8 @@ def save_all_relationships():
         if (DEBUG_LEVEL == 1):
             print((a, argo, b, line_id))
         b = b.replace("'", " ")
-        cypher = "MATCH (a:Word {code:'%s',line_id:'%s'}),(b:Word {code:'%s',line_id:'%s'}) CREATE (a)-[:LINK {type:'%s'}]->(b)" % (
-            a, line_id, b, line_id, argo)
+        cypher = "MATCH (a:Word {code:'%s',line_id:'%s'}),(b:Word {code:'%s',line_id:'%s'}) CREATE (a)-[:LINK {type:'%s',line_id:'%s'}]->(b)" % (
+            a, line_id, b, line_id, argo , line_id)
         graph.run(cypher)
 
 

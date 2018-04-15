@@ -1,19 +1,7 @@
-(c / contrast-01
-      :ARG1 (a / and
-            :op1 (f2 / face-01
-                  :ARG0 (i / it)
-                  :ARG1 (v / victim
-                        :mod (d4 / disaster)
-                        :mod (b2 / base
-                              :mod (b / broad)))
-                  :manner (s / sudden))
-            :op2 (d / deal-01
-                  :ARG0 i
-                  :ARG1 v
-                  :manner (d3 / direct)))
-      :ARG2 (r2 / recommend-01
-            :ARG1 (c4 / command-02
-                  :ARG1 (r / relieve-01
-                        :ARG1 (d2 / disaster))
-                  :ARG0-of (l / lead-02
-                        :mod (o3 / overall)))))
+# ::id bolt12_07_4800.1 ::date 2012-12-19T12:53:14 ::annotator SDL-AMR-09 ::preferred
+# ::snt Establishing Models in Industrial Innovation
+# ::save-date Wed Oct 30, 2013 ::file bolt12_07_4800_1.txt
+(e / establish-01
+  :ARG1 (m / model
+          :mod (i / innovate-01
+                 :ARG1 (i2 / industry))))
