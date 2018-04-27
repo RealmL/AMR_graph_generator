@@ -11,6 +11,10 @@
     <script src="/static/js/bootstrap.min.js"></script>
 
     <style>
+        html,
+        body {
+            height: 100%;
+        }
 
         .links line {
             stroke: #999;
@@ -22,12 +26,14 @@
             stroke-width: 4px;
         }
 
+        .container {
+            height: 100%;
+        }
+
         #chart {
             position: relative;
-            left: 5%;
-            right: 5%;
-            top: 5%;
-            bottom: 5%;
+            height: 100%;
+            left: 1%;
         }
     </style>
 
@@ -48,13 +54,17 @@
 
                     var color = d3.scaleOrdinal(d3.schemeCategory20);
 
+
                     var simulation = d3.forceSimulation()
-                        .force("link", d3.forceLink().distance(100).id(function (d) {
+                        .alpha(0.3)
+                        .force("link", d3.forceLink().id(function (d) {
                             return d.id;
                         }))
-                        .force("charge", d3.forceManyBody())
+                        .force("charge", d3.forceManyBody().strength(-3000).distanceMax(160))
+                        .force('collision', d3.forceCollide().radius(function (d) {
+                            return 20;
+                        }))
                         .force("center", d3.forceCenter(width / 2, height / 2));
-
 
                     function dragstarted(d) {
                         if (!d3.event.active) simulation.alphaTarget(0.3).restart();
@@ -96,11 +106,11 @@
                             .on("drag", dragged)
                             .on("end", dragended));
 
-                    var lables = node.append("text")
+                    var node_lables = node.append("text")
                         .text(function (d) {
                             return d.content;
                         })
-                        .attr('x', 9)
+                        .attr('x', 25)
                         .attr('y', 5);
 
                     simulation
@@ -145,7 +155,7 @@
 <div class="container h-100">
     <lable>请输入要查询的单词</lable>
     <input type="text" id="words">
-    <button  class="btn btn-default" id="query">查询</button>
+    <button class="btn btn-default" id="query">查询</button>
     <div id="chart">
         <svg></svg>
     </div>
