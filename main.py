@@ -111,14 +111,6 @@ def get_all_nodes(line, line_id):
             print(t)
         nodes.append(t)
 
-
-def save_all_nodes():
-    for code, content, line_id in nodes:
-        if (DEBUG_LEVEL == 1):
-            print((code, content, line_id))
-        create_node(code, content, line_id)
-
-
 def get_all_relationship(line, line_id):
     stack = ""
     i = 0
@@ -143,7 +135,6 @@ def get_all_relationship(line, line_id):
 def create_node(code, content, line_id):
     graph.run("create ( n:Word {code:'%s',content:'%s',line_id:'%s'})" %
               (code, content, line_id))
-
 
 def my_find_all(s, sub_str):
     return [m.start() for m in re.finditer(sub_str, s)]
@@ -170,12 +161,6 @@ def save_ex_relation(father_code, exception_piece, line_id):
     relationships.append(t)
 
 
-def save_ex_node(exception_piece, line_id):
-    relationship, child = exception_piece.strip().split(' ')
-    t = (raw(child), raw(child), line_id)
-    nodes.append(t)
-
-
 def filter_all_exception(line, line_id):
     exception_parten = re.compile(":\S+ [^):(]+")
     exception_pieces = set(re.findall(exception_parten, line))
@@ -185,15 +170,20 @@ def filter_all_exception(line, line_id):
             if (DEBUG_LEVEL >= 2):
                 print((father_code, exception_piece))
             save_ex_relation(father_code, exception_piece, line_id)
-            save_ex_node(exception_piece, line_id)
     res = exception_parten.sub('', line)
     return res
 
 
+def save_all_nodes():
+    for code, content, line_id in nodes:
+        if (DEBUG_LEVEL == 1):
+            print("Create node:",(code, content, line_id))
+        create_node(code, content, line_id)
+
 def save_all_relationships():
     for a, argo, b, line_id in relationships:
         if (DEBUG_LEVEL == 1):
-            print((a, argo, b, line_id))
+            print("Create relationship:",(a, argo, b, line_id))
         b = b.replace("'", " ")
         cypher = "MATCH (a:Word {code:'%s',line_id:'%s'}),(b:Word {code:'%s',line_id:'%s'}) CREATE (a)-[:LINK {type:'%s',line_id:'%s'}]->(b)" % (
             a, line_id, b, line_id, argo , line_id)
@@ -202,9 +192,11 @@ def save_all_relationships():
 
 if __name__ == "__main__":
     import sys
-    if (len(sys.argv) != 2):
-        print("run this script with one parameter: filename")
+    if (len(sys.argv) < 2):
+        print("run this script with atleast one parameter: filename")
         exit()
+    if(len(sys.argv)==3):
+        DEBUG_LEVEL = int(sys.argv[2])
     filename = sys.argv[1]
     with open(filename) as file:
         for l, line_id in merge_to_lines(file=file):

@@ -21,6 +21,11 @@
             stroke-opacity: 0.6;
         }
 
+        .linklabelholder linklabel {
+            stroke: #999;
+            stroke-opacity: 0.6;
+        }
+
         .nodes circle {
             stroke: #fff;
             stroke-width: 4px;
@@ -96,6 +101,21 @@
                         .data(graph.nodes)
                         .enter().append("g");
 
+                    var linktext = svg.append('g')
+                        .attr("class", "linklabelholder")
+                        .selectAll("g")
+                        .data(graph.links)
+                        .enter().append("g")
+                        .append("text")
+                        .attr("class", "linklabel")
+                        .attr("dx", 1)
+                        .attr("dy", ".35em")
+                        .attr("stroke","#ecbd47")
+                        .attr("text-anchor", "middle")
+                        .text(function (d) {
+                            return d.type
+                        });
+
                     var circles = node.append("circle")
                         .attr("r", 20)
                         .attr("fill", function (d) {
@@ -105,6 +125,7 @@
                             .on("start", dragstarted)
                             .on("drag", dragged)
                             .on("end", dragended));
+
 
                     var node_lables = node.append("text")
                         .text(function (d) {
@@ -137,6 +158,11 @@
                                 return d.target.y;
                             });
 
+                        // link label
+                        linktext.attr("transform", function (d) {
+                            return "translate(" + (d.source.x + d.target.x) / 2 + ","
+                                + (d.source.y + d.target.y) / 2 + ")";
+                        });
 
                         node
                             .attr("transform", function (d) {
@@ -151,7 +177,7 @@
 
 </head>
 <body>
-<h1>网络关系图</h1>
+<h1>AMR 语义结构图</h1>
 <div class="container h-100">
     <lable>请输入要查询的单词</lable>
     <input type="text" id="words">
