@@ -99,7 +99,9 @@
                         .attr("class", "nodes")
                         .selectAll("g")
                         .data(graph.nodes)
-                        .enter().append("g");
+                        .enter().append("g")
+                        .on("mouseover", handleMouseOver)
+                        .on("mouseout", handleMouseOut);
 
                     var linktext = svg.append('g')
                         .attr("class", "linklabelholder")
@@ -110,11 +112,13 @@
                         .attr("class", "linklabel")
                         .attr("dx", 1)
                         .attr("dy", ".35em")
-                        .attr("stroke","#ecbd47")
+                        .attr("stroke", "#ecbd47")
                         .attr("text-anchor", "middle")
                         .text(function (d) {
                             return d.type
-                        });
+                        })
+                        .on("mouseover", handleMouseOver)
+                        .on("mouseout", handleMouseOut);
 
                     var circles = node.append("circle")
                         .attr("r", 20)
@@ -173,6 +177,22 @@
                 });
             })
         });
+
+        // Create Event Handlers for mouse
+        function handleMouseOver(d, i) {  // Add interactivity
+
+            // Use D3 to select element, change color and size
+            d3.select(this).style(
+                "font-size", "300%"
+            );
+            this.parentElement.appendChild(this);
+        }
+
+        function handleMouseOut(d, i) {
+            d3.select(this).style(
+                "font-size", "100%"
+            );
+        }
     </script>
 
 </head>
