@@ -6200,4 +6200,3 @@
       :ARG2 (s / suffer-01
             :ARG1 (p / pain-01
                   :mod (t / this))))
-
