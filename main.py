@@ -1,4 +1,4 @@
-from py2neo import Graph
+from py2neo import Graph,Node
 import re
 
 DEBUG_LEVEL = 1 #1 for db_info;2 for exception info ;3 for all info
@@ -54,15 +54,18 @@ def merge_to_lines(file):
     lines = []
     res = ""
     line_id = ""
+    snt = ""
     for line in file:
         if (line[0] == "#" and len(res) > 0):
-            lines.append((res, line_id))
+            lines.append((res, line_id,snt))
             res = ""
         if (line[:6] == "# ::id"):
             line_id = re.findall("\# ::id (\S+) ::", line)[0]
+        if("# ::snt" in line):
+            snt = line[8:].strip()
         if (line[0] != "#"):
             res += line.strip()
-    lines.append((res, line_id))
+    lines.append((res, line_id,snt))
     return lines
 
 
@@ -189,8 +192,20 @@ def save_all_relationships():
             a, line_id, b, line_id, argo , line_id)
         graph.run(cypher)
 
+def save_sentence(snt,line_id):
+    snt = Node("Snt",content=snt,line_id=line_id)
+    # graph.run("create ( n:Snt {content:'%s',line_id:'%s'})" %
+    #           (snt, line_id))
+    graph.create(snt)
+
+def remove_all():
+    cypher = "match (n) where n:Word or n:Snt detach delete n;"
+    graph.run(cypher)
 
 if __name__ == "__main__":
+
+    remove_all()
+
     import sys
     if (len(sys.argv) < 2):
         print("run this script with atleast one parameter: filename")
@@ -199,10 +214,10 @@ if __name__ == "__main__":
         DEBUG_LEVEL = int(sys.argv[2])
     filename = sys.argv[1]
     with open(filename) as file:
-        for l, line_id in merge_to_lines(file=file):
+        for l,line_id,snt in merge_to_lines(file=file):
+            save_sentence(snt,line_id)
             line = filter_all_exception(l, line_id)
             get_all_nodes(line, line_id)
-            print("=" * 50)
             get_all_relationship(line, line_id)
     save_all_nodes()
     save_all_relationships()

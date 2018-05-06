@@ -1,0 +1,31 @@
+.table-fixed tbody {
+    height: 500px;
+    overflow-y: auto;
+    width: 100%;
+    border: solid;
+    border-width: 3px;
+}
+
+.table-fixed thead,
+.table-fixed tbody,
+.table-fixed tr,
+.table-fixed td,
+.table-fixed th {
+    display: block;
+}
+
+.table-fixed th {
+    width: 260px;
+}
+
+.table-fixed tr:after {
+    content: "";
+    display: block;
+    visibility: hidden;
+    clear: both;
+}
+
+.table-fixed tbody td,
+.table-fixed thead > tr > th {
+    float: left;
+}

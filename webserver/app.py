@@ -1,9 +1,10 @@
 # coding=utf-8
 from flask import Flask, jsonify, render_template, request
-from py2neo import Graph,remote
+from py2neo import Graph, remote
 
 app = Flask(__name__)
 graph = Graph("http://127.0.0.1:7474", username="neo4j", password="xlsd1996")
+
 
 # def buildNodes(nodeRecord):
 #     data = {"id": str(nodeRecord.n._id), "content": next(iter(nodeRecord.n.content))}
@@ -42,52 +43,48 @@ def get_relationships_by_line_id(line_id):
 
 
 @app.route('/graph')
-def get_graph():
-    words = request.args.get("words")
-    words_list = words.split(' ')
+def get_graph_by_lineid():
+    line_id = request.args.get("line_id")
     nodes = []
     edges = []
-    max_size = 20
-    # for word in words_list:
-    #     qs = 'MATCH (n:Word) where n.content =~ "%s" RETURN n' % word
-    #     for i in graph.run(qs):
-    #         for n in get_all_related_nodes(i['n']['line_id']):
-    #             node ={"id":get_node_id(n['n']),"code":n['n']['code'],"content":n['n']['content'],"line_id":n['n']['line_id']}
-    #             nodes.append({"data":node})
-    #             for e in get_all_relationship_by_line_id(line_id=n['n']['line_id']):
-    #                 edge={"source":get_node_id(e['r'].start_node()),
-    #                       "target":get_node_id(e['r'].end_node()),
-    #                       "type":e['r']["type"]
-    #                       }
-    #                 edges.append({"data":edge})
-    #         break
-    for word in words_list:
-        #TODO: the word must be safe
-        qs = 'MATCH (n:Word) where n.content =~ ".*%s.*" RETURN n' % word
-        for i in graph.run(qs):
-            for n in get_nodes_by_line_id(i['n']['line_id']):
-                node = {
-                    "id": get_node_id(n['n']),
-                    "label": n['n']['code'],
-                    "code": n['n']['code'],
-                    "content": n['n']['content'],
-                    "line_id": n['n']['line_id']
-                }
-                nodes.append(node)
-            for e in get_relationships_by_line_id(
-                    line_id=n['n']['line_id']):
-                edge = {
-                    "source": get_node_id(e['r'].start_node()),
-                    "target": get_node_id(e['r'].end_node()),
-                    "type": e['r']["type"],
-                }
-                edges.append(edge)
-            break
-
-    #nodes = map(buildNodes, graph.run('MATCH (n) RETURN n limit 25'))
-    # edges = map(buildEdges, graph.run('MATCH ()-[r]->() RETURN r limit 25'))
+    # get all nodes in target line
+    for n in get_nodes_by_line_id(line_id):
+        node = {
+            "id": get_node_id(n['n']),
+            "label": n['n']['code'],
+            "code": n['n']['code'],
+            "content": n['n']['content'],
+            "line_id": n['n']['line_id']
+        }
+        nodes.append(node)
+    # get all relation in target line
+    for e in get_relationships_by_line_id(
+            line_id=line_id):
+        edge = {
+            "source": get_node_id(e['r'].start_node()),
+            "target": get_node_id(e['r'].end_node()),
+            "type": e['r']["type"],
+        }
+        edges.append(edge)
     res = jsonify({"nodes": nodes, "links": edges})
     return res
+
+
+@app.route('/snts')
+def search_sentences_by_keywords():
+    words = request.args.get("words")
+    words_list = words.split(' ')
+
+    res = []
+    for word in words_list:
+        cypher = "Match (s:Snt) Where s.content =~ '.*(?i)%s.*' Return s" % word
+        if (not res):
+            res = set(graph.run(cypher))
+        else:
+            temp = set(graph.run(cypher))
+            res &= temp
+
+    return jsonify([{"content": s['s']['content'], 'line_id': s['s']['line_id']} for s in res])
 
 
 if __name__ == '__main__':
