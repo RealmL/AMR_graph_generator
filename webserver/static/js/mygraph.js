@@ -23,8 +23,20 @@ $(document).ready(function () {
                     get_data_with_line_id(item['line_id']);
                 });
                 var newCell = newRow.insertCell(0);
-                var newText = document.createTextNode(item['content']);
-                newCell.appendChild(newText);
+                var t = item['content'];
+                var word_list = $("#words").val().split(" ");
+                word_list.forEach(function (w, index) {
+                        if (/\S/.test(w)) {
+                            var re = new RegExp(w, "ig");
+                            var matchs =t.match(new RegExp(re, 'ig'));
+                            if (matchs.length){
+                               t = t.replace(re, "<span class='myhighlight'><b>"+matchs[0]+"</b></span>");
+                            }
+                            newCell.innerHTML = t;
+                        }
+                    }
+                );
+
             })
         });
 

@@ -163,6 +163,10 @@ def save_ex_relation(father_code, exception_piece, line_id):
     t = (father_code, relationship[1:], child, line_id)
     relationships.append(t)
 
+def save_ex_node(exception_piece, line_id):
+    relationship, child = exception_piece.strip().split(' ')
+    t = (raw(child), raw(child), line_id)
+    nodes.append(t)
 
 def filter_all_exception(line, line_id):
     exception_parten = re.compile(":\S+ [^):(]+")
@@ -173,6 +177,7 @@ def filter_all_exception(line, line_id):
             if (DEBUG_LEVEL >= 2):
                 print((father_code, exception_piece))
             save_ex_relation(father_code, exception_piece, line_id)
+        save_ex_node(exception_piece, line_id)
     res = exception_parten.sub('', line)
     return res
 

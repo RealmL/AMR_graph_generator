@@ -77,6 +77,8 @@ def search_sentences_by_keywords():
 
     res = []
     for word in words_list:
+        if(not word):
+            continue
         cypher = "Match (s:Snt) Where s.content =~ '.*(?i)%s.*' Return s" % word
         if (not res):
             res = set(graph.run(cypher))
