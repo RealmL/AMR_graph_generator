@@ -88,4 +88,4 @@ def search_sentences_by_keywords():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True,host="0.0.0.0")
