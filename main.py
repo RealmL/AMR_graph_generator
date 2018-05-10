@@ -3,7 +3,8 @@ import re
 
 DEBUG_LEVEL = 1 #1 for db_info;2 for exception info ;3 for all info
 
-nodes = []
+nodes_dict = dict()
+ex_nodes_dict = dict()
 relationships = []
 
 escape_dict = {
@@ -112,7 +113,7 @@ def get_all_nodes(line, line_id):
         t = (code, content, line_id)
         if (DEBUG_LEVEL >= 3):
             print(t)
-        nodes.append(t)
+        nodes_dict[t[0]] = t
 
 def get_all_relationship(line, line_id):
     stack = ""
@@ -162,11 +163,20 @@ def save_ex_relation(father_code, exception_piece, line_id):
     relationship, child = exception_piece.strip().split(' ')
     t = (father_code, relationship[1:], child, line_id)
     relationships.append(t)
+    # print(t)
+
+def exist_ex_node(code:str):
+    return code in ex_nodes_dict
+
+def exist_normal_node(code:str):
+    return code in nodes_dict
 
 def save_ex_node(exception_piece, line_id):
     relationship, child = exception_piece.strip().split(' ')
     t = (raw(child), raw(child), line_id)
-    nodes.append(t)
+    if(not exist_ex_node(t[0])):
+        ex_nodes_dict[t[0]] = t
+        # print(t)
 
 def filter_all_exception(line, line_id):
     exception_parten = re.compile(":\S+ [^):(]+")
@@ -183,10 +193,20 @@ def filter_all_exception(line, line_id):
 
 
 def save_all_nodes():
-    for code, content, line_id in nodes:
+    for code in nodes_dict:
+        code, content, line_id = nodes_dict[code]
         if (DEBUG_LEVEL == 1):
             print("Create node:",(code, content, line_id))
         create_node(code, content, line_id)
+    for code in ex_nodes_dict:
+        if(code not in nodes_dict):
+            code, content, line_id = ex_nodes_dict[code]
+            if (DEBUG_LEVEL == 1):
+                print("Create node:", (code, content, line_id))
+            create_node(code, content, line_id)
+    nodes_dict.clear()
+    ex_nodes_dict.clear()
+
 
 def save_all_relationships():
     for a, argo, b, line_id in relationships:
@@ -196,6 +216,7 @@ def save_all_relationships():
         cypher = "MATCH (a:Word {code:'%s',line_id:'%s'}),(b:Word {code:'%s',line_id:'%s'}) CREATE (a)-[:LINK {type:'%s',line_id:'%s'}]->(b)" % (
             a, line_id, b, line_id, argo , line_id)
         graph.run(cypher)
+    relationships.clear()
 
 def save_sentence(snt,line_id):
     snt = Node("Snt",content=snt,line_id=line_id)
@@ -224,5 +245,12 @@ if __name__ == "__main__":
             line = filter_all_exception(l, line_id)
             get_all_nodes(line, line_id)
             get_all_relationship(line, line_id)
-    save_all_nodes()
-    save_all_relationships()
+            save_all_nodes()
+            save_all_relationships()
+            # print("="*20+"Nodes"+"="*20)
+            # for code in nodes_dict:
+            #     print(nodes_dict[code])
+            # print("="*20+"Ex_Nodes"+"="*20)
+            # for code in ex_nodes_dict:
+            #     print(ex_nodes_dict[code])
+
