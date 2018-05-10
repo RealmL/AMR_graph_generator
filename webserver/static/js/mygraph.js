@@ -28,9 +28,9 @@ $(document).ready(function () {
                 word_list.forEach(function (w, index) {
                         if (/\S/.test(w)) {
                             var re = new RegExp(w, "ig");
-                            var matchs =t.match(new RegExp(re, 'ig'));
-                            if (matchs.length){
-                               t = t.replace(re, "<span class='myhighlight'><b>"+matchs[0]+"</b></span>");
+                            var matchs = t.match(new RegExp(re, 'ig'));
+                            if (matchs.length) {
+                                t = t.replace(re, "<span class='myhighlight'><b>" + matchs[0] + "</b></span>");
                             }
                             newCell.innerHTML = t;
                         }
@@ -61,6 +61,16 @@ function draw_with_data(graph) {
     svg
         .attr("width", width)
         .attr("height", height);
+
+    svg.append("defs").append("marker")
+        .attr("id", "arrowhead")
+        .attr("refX", 8 + 3) /*must be smarter way to calculate shift*/
+        .attr("refY", 2)
+        .attr("markerWidth", 6)
+        .attr("markerHeight", 4)
+        .attr("orient", "auto")
+        .append("path")
+        .attr("d", "M 0,0 V 4 L6,2 Z"); //this is actual shape for arrowhead
 
     var color = d3.scaleOrdinal(d3.schemeCategory20);
 
@@ -95,10 +105,11 @@ function draw_with_data(graph) {
 
     var link = svg.append("g")
         .attr("class", "links")
+        .attr("marker-end", "url(#arrowhead)")
         .selectAll("line")
         .data(graph.links)
         .enter().append("line")
-        .attr("stroke-width", 5);
+        .attr("stroke-width", 4);
 
     var node = svg.append("g")
         .attr("class", "nodes")
