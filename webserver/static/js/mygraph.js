@@ -72,7 +72,18 @@ function draw_with_data(graph) {
         .append("path")
         .attr("d", "M 0,0 V 4 L6,2 Z"); //this is actual shape for arrowhead
 
-    var color = d3.scaleOrdinal(d3.schemeCategory20);
+    function color(type) {
+        if (type == "normal") {
+            return "#2277cd";
+        }
+        if (type == "literal") {
+            return "#72cd13";
+        }
+        if (type == "root") {
+            return "#cd4f59";
+        }
+
+    }
 
 
     var simulation = d3.forceSimulation()
@@ -139,7 +150,7 @@ function draw_with_data(graph) {
     var circles = node.append("circle")
         .attr("r", 20)
         .attr("fill", function (d) {
-            return color(d.group);
+            return color(d.type);
         })
         .call(d3.drag()
             .on("start", dragstarted)

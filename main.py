@@ -107,10 +107,15 @@ def get_node_from_line(line):
 
 def get_all_nodes(line, line_id):
     line = delete_relation(line)
-    for node in get_node_from_line(line):
+    normal_nodes = list(get_node_from_line(line))
+    for i,node in enumerate(normal_nodes):
         code = node[1:node.index(' ')]
         content = node[node.index('/') + 2:-1]
-        t = (code, content, line_id)
+        t = [code, content, line_id]
+        if (i == (len(normal_nodes)-1)):
+            t.append("root")
+        else:
+            t.append("normal")
         if (DEBUG_LEVEL >= 3):
             print(t)
         nodes_dict[t[0]] = t
@@ -136,9 +141,9 @@ def get_all_relationship(line, line_id):
         i += 1
 
 
-def create_node(code, content, line_id):
-    graph.run("create ( n:Word {code:'%s',content:'%s',line_id:'%s'})" %
-              (code, content, line_id))
+def create_node(code, content, line_id,type):
+    graph.run("create ( n:Word {code:'%s',content:'%s',line_id:'%s',type:'%s'})" %
+          (code, content, line_id,type))
 
 def my_find_all(s, sub_str):
     return [m.start() for m in re.finditer(sub_str, s)]
@@ -173,7 +178,7 @@ def exist_normal_node(code:str):
 
 def save_ex_node(exception_piece, line_id):
     relationship, child = exception_piece.strip().split(' ')
-    t = (raw(child), raw(child), line_id)
+    t = (raw(child), raw(child), line_id,'literal')
     if(not exist_ex_node(t[0])):
         ex_nodes_dict[t[0]] = t
         # print(t)
@@ -194,16 +199,16 @@ def filter_all_exception(line, line_id):
 
 def save_all_nodes():
     for code in nodes_dict:
-        code, content, line_id = nodes_dict[code]
+        code, content, line_id,type = nodes_dict[code]
+        create_node(code, content, line_id, type)
         if (DEBUG_LEVEL == 1):
-            print("Create node:",(code, content, line_id))
-        create_node(code, content, line_id)
+            print("Create node:",(code, content, line_id,type))
     for code in ex_nodes_dict:
         if(code not in nodes_dict):
-            code, content, line_id = ex_nodes_dict[code]
+            code, content, line_id,type = ex_nodes_dict[code]
             if (DEBUG_LEVEL == 1):
-                print("Create node:", (code, content, line_id))
-            create_node(code, content, line_id)
+                print("Create node:", (code, content, line_id,type))
+            create_node(code, content, line_id,type=type)
     nodes_dict.clear()
     ex_nodes_dict.clear()
 

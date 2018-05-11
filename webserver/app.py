@@ -54,7 +54,8 @@ def get_graph_by_lineid():
             "label": n['n']['code'],
             "code": n['n']['code'],
             "content": n['n']['content'],
-            "line_id": n['n']['line_id']
+            "line_id": n['n']['line_id'],
+            "type":n['n']['type']
         }
         nodes.append(node)
     # get all relation in target line
