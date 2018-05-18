@@ -18,7 +18,7 @@ $(document).ready(function () {
             if (snts.length == 0) {
                 alert("未查询到相关结果，请更换查询条件。");
             } else {
-                $("#snt_num").val(snts.length);
+                $("#snt_num").text(snts.length.toString());
                 snts.forEach(function (item, index) {
                     var tableRef = document.getElementById('myTable').getElementsByTagName('tbody')[0];
                     var newRow = tableRef.insertRow(tableRef.rows.length);
