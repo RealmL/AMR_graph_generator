@@ -15,35 +15,37 @@ $(document).ready(function () {
 
             $("#myTable tbody tr").remove();
 
-            if(snts.length==0){
+            if (snts.length == 0) {
                 alert("未查询到相关结果，请更换查询条件。");
+            } else {
+                $("#snt_num").val(snts.length);
+                snts.forEach(function (item, index) {
+                    var tableRef = document.getElementById('myTable').getElementsByTagName('tbody')[0];
+                    var newRow = tableRef.insertRow(tableRef.rows.length);
+                    newRow.setAttribute("class", "sntclick");
+                    newRow.setAttribute("id", item['line_id']);
+                    newRow.addEventListener("click", function () {
+                        get_data_with_line_id(item['line_id']);
+                    });
+                    var newCell = newRow.insertCell(0);
+                    var t = item['content'];
+                    var word_list = $("#words").val().split(" ");
+                    word_list.forEach(function (w, index) {
+                            if (/\S/.test(w)) {
+                                var re = new RegExp(w, "ig");
+                                var matchs = t.match(new RegExp(re, 'ig'));
+                                if (matchs.length) {
+                                    t = t.replace(re, "<span class='myhighlight'><b>" + matchs[0] + "</b></span>");
+                                }
+                                newCell.innerHTML = t;
+                            }
+                        }
+                    );
+
+                })
             }
 
 
-            snts.forEach(function (item, index) {
-                var tableRef = document.getElementById('myTable').getElementsByTagName('tbody')[0];
-                var newRow = tableRef.insertRow(tableRef.rows.length);
-                newRow.setAttribute("class", "sntclick");
-                newRow.setAttribute("id", item['line_id']);
-                newRow.addEventListener("click", function () {
-                    get_data_with_line_id(item['line_id']);
-                });
-                var newCell = newRow.insertCell(0);
-                var t = item['content'];
-                var word_list = $("#words").val().split(" ");
-                word_list.forEach(function (w, index) {
-                        if (/\S/.test(w)) {
-                            var re = new RegExp(w, "ig");
-                            var matchs = t.match(new RegExp(re, 'ig'));
-                            if (matchs.length) {
-                                t = t.replace(re, "<span class='myhighlight'><b>" + matchs[0] + "</b></span>");
-                            }
-                            newCell.innerHTML = t;
-                        }
-                    }
-                );
-
-            })
         });
 
     });
