@@ -14,6 +14,12 @@ $(document).ready(function () {
         $.get('/snts?words=' + $("#words").val(), function (snts, status) {
 
             $("#myTable tbody tr").remove();
+
+            if(snts.length==0){
+                alert("未查询到相关结果，请更换查询条件。");
+            }
+
+
             snts.forEach(function (item, index) {
                 var tableRef = document.getElementById('myTable').getElementsByTagName('tbody')[0];
                 var newRow = tableRef.insertRow(tableRef.rows.length);
